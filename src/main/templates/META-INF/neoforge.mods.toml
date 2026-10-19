@@ -1,17 +1,22 @@
 modLoader="javafml"
 loaderVersion="[1,)"
 license="All Rights Reserved"
-#issueTrackerURL=""
+
+issueTrackerURL="https://github.com/Tamamiou/tinker-also-soul/issues"
 
 [[mods]]
 modId="tinker_also_soul"
 version="1.0.0"
 displayName="Tinker Also Soul"
 authors="Tamamiou"
-description='''
+
 logoFile="logo.png"
-修复匠魂盔甲相关的某些问题。
+description='''
+修复匠魂盔甲在史诗战斗中的渲染问题。
+内置匠魂与史诗战斗的武器兼容数据包。
 '''
+
+# ================== 依赖声明区域 ==================
 
 [[dependencies.tinker_also_soul]]
 modId="neoforge"
@@ -24,5 +29,26 @@ side="BOTH"
 modId="minecraft"
 type="required"
 versionRange="[1.21.1]"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.tinker_also_soul]]
+modId="epicfight"
+type="required"
+versionRange="[21.14.0,)" # 这里的版本号范围根据你测试时用的版本调整
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.tinker_also_soul]]
+modId="tconstruct"
+type="required"
+versionRange="[3.13.0,)" # 同样，根据你的匠魂版本调整
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.tinker_also_soul]]
+modId="mantle"
+type="required"
+versionRange="[1.12.0,)" # 根据你的 Mantle 版本调整
 ordering="NONE"
 side="BOTH"
