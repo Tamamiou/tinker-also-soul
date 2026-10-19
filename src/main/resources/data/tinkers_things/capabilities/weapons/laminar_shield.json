@@ -1,0 +1,8 @@
+{
+	"type": "epicfight:shield",
+	"attributes": {
+		"common": {
+  			"impact": 1.5
+		}
+	}
+}

@@ -1,0 +1,28 @@
+modLoader="javafml"
+loaderVersion="[1,)"
+license="All Rights Reserved"
+#issueTrackerURL=""
+
+[[mods]]
+modId="tinker_also_soul"
+version="1.0.0"
+displayName="Tinker Also Soul"
+authors="Tamamiou"
+description='''
+logoFile="logo.png"
+修复匠魂盔甲相关的某些问题。
+'''
+
+[[dependencies.tinker_also_soul]]
+modId="neoforge"
+type="required"
+versionRange="[21.1.0,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.tinker_also_soul]]
+modId="minecraft"
+type="required"
+versionRange="[1.21.1]"
+ordering="NONE"
+side="BOTH"

@@ -1,0 +1,15 @@
+{
+	"type": "epicfight:shovel",
+	"attributes": {
+		"common": {
+  			"impact": 3.5,
+			"max_strikes": 3
+		}
+	},
+	"collider":
+	{
+		"number": 3,
+		"center": [0.0, 0.0, -0.35],
+		"size": [0.65, 0.65, 0.90]
+	}
+}
