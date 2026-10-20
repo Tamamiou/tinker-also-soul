@@ -1,8 +1,0 @@
-{
-  "default": [
-    { "name": "tinkers_things:silkibound", "level": 1 }
-  ],
-  "perStat": {
-    "tconstruct:armor": [{ "name": "tinkers_things:silkitoxin", "level": 1 }]
-  }
-}

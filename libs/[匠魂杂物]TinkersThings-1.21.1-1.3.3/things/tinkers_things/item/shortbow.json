@@ -1,6 +1,0 @@
-{
-  "type": "tconstruct:bow",
-  "max_stack_size": 1,
-  "store_drawing_item": true,
-  "color_handler": "tconstruct:tool"
-}
