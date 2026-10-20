@@ -1,0 +1,14 @@
+{
+  "level_display": "tconstruct:single_level",
+  "tooltip_display": "always",
+  "modules": [
+    {
+      "type": "tconstruct:attribute",
+      "unique": "tinkers_things.modifier.range",
+      "attribute": "minecraft:player.entity_interaction_range",
+      "operation": "add_value",
+      "each_level": 1,
+      "slots": [ "mainhand", "offhand" ]
+    }
+  ]
+}

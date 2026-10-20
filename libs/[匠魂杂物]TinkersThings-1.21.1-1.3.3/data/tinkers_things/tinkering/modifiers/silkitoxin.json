@@ -1,0 +1,26 @@
+{
+  "level_display": "tconstruct:single_level",
+  "tooltip_display": "always",
+  "modules": [
+    {
+      "type": "tconstruct:attribute",
+      "attribute": "minecraft:generic.max_health",
+      "each_level": -3.0,
+      "operation": "add_value",
+      "slots": [
+        "feet",
+        "legs",
+        "chest",
+        "head",
+        "mainhand",
+        "offhand"
+      ],
+      "unique": "tinkers_things.modifier.silitoxin"
+    },
+    {
+      "type": "tconstruct:modifier_slot",
+      "each_level": 1,
+      "name": "abilities"
+    }
+  ]
+}

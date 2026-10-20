@@ -1,0 +1,18 @@
+{
+  "loader": "tconstruct:tool",
+  "parent": "neoforge:item/default",
+  "textures": {
+    "upper": "tinkers_things:item/tool/laminar_armor/leggings/upper_broken",
+    "lower": "tinkers_things:item/tool/laminar_armor/leggings/lower_broken",
+    "wood":  "tinkers_things:item/tool/laminar_armor/leggings/wood_broken"
+  },
+  "parts": [
+    { "name": "lower", "index": 1 },
+    { "name": "upper", "index": 0 },
+    { "name": "wood",  "index": 2 }
+  ],
+  "modifier_roots": [
+    "tinkers_things:item/tool/laminar_armor/leggings/modifiers/broken/",
+    "tinkers_things:item/tool/laminar_armor/leggings/modifiers/"
+  ]
+}

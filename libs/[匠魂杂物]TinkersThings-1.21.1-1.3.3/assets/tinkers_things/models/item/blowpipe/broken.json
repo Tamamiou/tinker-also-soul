@@ -1,0 +1,11 @@
+{
+  "loader": "tconstruct:tool",
+  "parent": "tconstruct:item/base/crossbow",
+  "textures": {
+    "tool": "tinkers_things:item/tool/blowpipe/broken"
+  },
+  "modifier_roots": [ "tinkers_things:item/tool/blowpipe/modifiers/broken/", "tinkers_things:item/tool/blowpipe/modifiers/" ],
+  "parts": [
+    { "name": "tool" }
+  ]
+}

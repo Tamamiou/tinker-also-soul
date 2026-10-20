@@ -1,0 +1,15 @@
+{
+  "layers": [
+    {
+      "type": "tconstruct:fixed",
+      "prefix": "tinkers_things:makeshift/",
+      "suffix": "_base"
+    },
+    {
+      "type": "tconstruct:persistent_data",
+      "prefix": "tinkers_things:makeshift/",
+      "material_key": "tconstruct:embellishment"
+    },
+    "tconstruct:trim"
+  ]
+}

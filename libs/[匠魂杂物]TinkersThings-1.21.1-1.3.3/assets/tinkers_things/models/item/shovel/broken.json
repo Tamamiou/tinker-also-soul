@@ -1,0 +1,12 @@
+{
+  "loader": "tconstruct:tool",
+  "parent": "neoforge:item/default-tool",
+  "textures": {
+    "head":   "tinkers_things:item/tool/shovel/head_broken",
+    "handle": "tinkers_things:item/tool/shovel/handle"
+  },
+  "parts": [
+    { "name": "handle", "index": 1 },
+    { "name": "head",   "index": 0 }
+  ]
+}

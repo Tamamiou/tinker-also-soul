@@ -1,0 +1,7 @@
+{
+  "loader": "tconstruct:material",
+  "parent": "neoforge:item/default",
+  "textures": {
+    "texture": "tinkers_things:item/tool/laminar_armor/shield/small_overlay"
+  }
+}

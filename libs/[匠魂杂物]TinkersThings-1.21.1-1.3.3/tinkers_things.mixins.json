@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "slimeknights.tinkersthings.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "VanillaPackResourcesBuilderMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

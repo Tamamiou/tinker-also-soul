@@ -1,0 +1,13 @@
+{
+  "level_display": "tconstruct:default",
+  "tooltip_display": "always",
+  "modules": [
+    {
+      "type": "tconstruct:weapon_mob_effect",
+      "target": "mantle:any",
+      "effect": "minecraft:blindness",
+      "level": { "flat": 1 },
+      "time": { "flat": 60, "per_level": 20, "random": 20 }
+    }
+  ]
+}

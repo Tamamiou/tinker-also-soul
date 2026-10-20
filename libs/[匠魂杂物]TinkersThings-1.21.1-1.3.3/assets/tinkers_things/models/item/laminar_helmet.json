@@ -1,0 +1,21 @@
+{
+  "loader": "tconstruct:tool",
+  "parent": "neoforge:item/default",
+  "textures": {
+    "upper": "tinkers_things:item/tool/laminar_armor/helmet/upper",
+    "lower": "tinkers_things:item/tool/laminar_armor/helmet/lower",
+    "wood":  "tinkers_things:item/tool/laminar_armor/helmet/wood"
+  },
+  "parts": [
+    { "name": "lower", "index": 1 },
+    { "name": "upper", "index": 0 },
+    { "name": "wood",  "index": 2 }
+  ],
+  "modifier_roots": [ "tinkers_things:item/tool/laminar_armor/helmet/modifiers/" ],
+  "overrides": [
+    {
+      "predicate": { "tconstruct:broken": 1 },
+      "model": "tinkers_things:item/laminar/helmet_broken"
+    }
+  ]
+}

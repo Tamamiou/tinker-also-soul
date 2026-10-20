@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:plain",
+  "lore": [
+    { "translate": "item.tconstruct.dummy_tool_part.tooltip", "color": "gray" }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "replace": false,
+  "values": [
+    "#tinkers_things:casts/large_repair_kit_single_use",
+    "#tinkers_things:casts/shield_plating_single_use"
+  ]
+}

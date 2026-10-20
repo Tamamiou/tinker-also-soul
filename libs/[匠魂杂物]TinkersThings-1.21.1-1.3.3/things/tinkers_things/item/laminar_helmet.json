@@ -1,0 +1,8 @@
+{
+  "type": "tconstruct:multilayer_armor",
+  "slot": "helmet",
+  "equip_sound": "item.armor.equip_generic",
+  "max_stack_size": 1,
+  "model_name": "tinkers_things:laminar",
+  "color_handler": "tconstruct:tool"
+}

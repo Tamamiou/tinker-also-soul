@@ -1,0 +1,22 @@
+{
+  "loader": "tconstruct:tool",
+  "parent": "neoforge:item/default-tool",
+  "textures": {
+    "head":   "tinkers_things:item/tool/shovel/head",
+    "handle": "tinkers_things:item/tool/shovel/handle"
+  },
+  "parts": [
+    { "name": "handle", "index": 1 },
+    { "name": "head",   "index": 0 }
+  ],
+  "overrides": [
+    {
+      "predicate": { "tconstruct:charging": 2 },
+      "model": "tinkers_things:item/shovel/blocking"
+    },
+    {
+      "predicate": { "tconstruct:broken": 1 },
+      "model": "tinkers_things:item/shovel/broken"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "loader": "tconstruct:tool",
+  "parent": "neoforge:item/default",
+  "textures": {
+    "tool": "tinkers_things:item/tool/makeshift_armor/helmet"
+  },
+  "modifier_roots": [ "tinkers_things:item/tool/makeshift_armor/helmet_modifiers/" ],
+  "first_modifiers": [ "tconstruct:embellishment" ],
+  "overrides": [
+    {
+      "predicate": { "tconstruct:broken": 1 },
+      "model": "tinkers_things:item/makeshift/helmet_broken"
+    }
+  ]
+}

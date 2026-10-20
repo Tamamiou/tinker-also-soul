@@ -1,0 +1,27 @@
+{
+  "loader": "tconstruct:tool",
+  "parent": "tinkers_things:item/laminar/shield_display",
+  "textures": {
+    "shield":        "tinkers_things:item/tool/laminar_armor/shield/small_broken",
+    "overlay":       "tinkers_things:item/tool/laminar_armor/shield/small_overlay",
+    "large_shield":  "tinkers_things:item/tool/laminar_armor/shield/large_broken",
+    "large_overlay": "tinkers_things:item/tool/laminar_armor/shield/large_overlay"
+  },
+  "parts": [
+    { "name": "shield",  "index": 1 },
+    { "name": "overlay", "index": 0 }
+  ],
+  "modifier_roots": {
+    "small": [
+      "tinkers_things:item/tool/laminar_armor/shield/small_modifiers/broken/",
+      "tinkers_things:item/tool/laminar_armor/shield/small_modifiers/"
+    ],
+    "large": [
+      "tinkers_things:item/tool/laminar_armor/shield/large_modifiers/broken/",
+      "tinkers_things:item/tool/laminar_armor/shield/large_modifiers/"
+    ]
+  },
+  "large": true,
+  "large_offset": [-8, 0],
+  "first_modifiers": [ "tconstruct:dyed" ]
+}

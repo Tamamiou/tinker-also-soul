@@ -1,0 +1,12 @@
+{
+  "tool": "tinkers_things:blowpipe",
+  "text": [
+    { "text": "Bamboozle your enemies, or just get a cheap projectile." }
+  ],
+  "properties": [
+    "Fires bamboo darts grown from the pipe",
+    "High accuracy and draw speed",
+    "Low velocity and damage",
+    "Can fire arrows with special potions"
+  ]
+}

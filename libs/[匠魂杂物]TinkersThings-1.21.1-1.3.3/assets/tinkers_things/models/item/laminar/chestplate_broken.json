@@ -1,0 +1,18 @@
+{
+  "loader": "tconstruct:tool",
+  "parent": "neoforge:item/default",
+  "textures": {
+    "upper": "tinkers_things:item/tool/laminar_armor/chestplate/upper_broken",
+    "lower": "tinkers_things:item/tool/laminar_armor/chestplate/lower_broken",
+    "wood":  "tinkers_things:item/tool/laminar_armor/chestplate/wood"
+  },
+  "parts": [
+    { "name": "lower", "index": 1 },
+    { "name": "upper", "index": 0 },
+    { "name": "wood",  "index": 2 }
+  ],
+  "modifier_roots": [
+    "tinkers_things:item/tool/laminar_armor/chestplate/modifiers/broken/",
+    "tinkers_things:item/tool/laminar_armor/chestplate/modifiers/"
+  ]
+}

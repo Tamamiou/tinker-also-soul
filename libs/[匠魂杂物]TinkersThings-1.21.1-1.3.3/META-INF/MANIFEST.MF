@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Specification-Title: Tinkers' Things
+Specification-Vendor: Slime Knights
+Specification-Version: 1
+Implementation-Title: TinkersThings
+Implementation-Version: 1.21.1-1.3.3-port
+Implementation-Vendor: Slime Knights
+
