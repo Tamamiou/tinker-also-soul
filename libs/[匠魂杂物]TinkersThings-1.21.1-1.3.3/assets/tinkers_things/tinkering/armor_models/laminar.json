@@ -1,0 +1,20 @@
+{
+  "layers": [
+    {
+      "type": "tconstruct:material",
+      "index": 1,
+      "prefix": "tinkers_things:laminar/lower_"
+    },
+    {
+      "type": "tconstruct:material",
+      "index": 0,
+      "prefix": "tinkers_things:laminar/upper_"
+    },
+    {
+      "type": "tconstruct:material",
+      "index": 2,
+      "prefix": "tinkers_things:laminar/wood_"
+    },
+    "tconstruct:trim"
+  ]
+}
