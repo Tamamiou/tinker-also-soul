@@ -24,7 +24,11 @@ public class ArmorTextureBaker {
         @Override
         protected boolean removeEldestEntry(Map.Entry<String, ResourceLocation> eldest) {
             if (size() > MAX_CACHE_SIZE) {
-                Minecraft.getInstance().getTextureManager().release(eldest.getValue());
+                try {
+                    Minecraft.getInstance().getTextureManager().release(eldest.getValue());
+                } catch (Exception e) {
+                    // ignore
+                }
                 return true;
             }
             return false;
@@ -32,36 +36,41 @@ public class ArmorTextureBaker {
     };
 
     public static ResourceLocation getOrBakeArmor(ItemStack stack, EquipmentSlot slot, RegistryAccess access) {
-        String cacheKey = generateCacheKey(stack, slot);
+        try {
+            String cacheKey = generateCacheKey(stack, slot);
 
-        if (BAKED_CACHE.containsKey(cacheKey)) {
-            return BAKED_CACHE.get(cacheKey);
+            if (BAKED_CACHE.containsKey(cacheKey)) {
+                return BAKED_CACHE.get(cacheKey);
+            }
+
+            List<TinkerArmorExtractor.ArmorLayerInfo> layers = TinkerArmorExtractor.getLayerPaths(stack, slot, access);
+
+            if (layers.isEmpty()) {
+                int layerNum = (slot == EquipmentSlot.LEGS) ? 2 : 1;
+                return ResourceLocation.withDefaultNamespace("textures/models/armor/iron_layer_" + layerNum + ".png");
+            }
+
+            ResourceLocation finalTexture = bakePixels(layers, cacheKey);
+            if (finalTexture != null) {
+                BAKED_CACHE.put(cacheKey, finalTexture);
+                return finalTexture;
+            }
+        } catch (Throwable t) {
+            TinkerAlsoSoul.LOGGER.error("[Tinker Also Soul] Fatal error during armor baking, returning null.", t);
         }
-
-        List<TinkerArmorExtractor.ArmorLayerInfo> layers = TinkerArmorExtractor.getLayerPaths(stack, slot, access);
-
-        if (layers.isEmpty()) {
-            int layerNum = (slot == EquipmentSlot.LEGS) ? 2 : 1;
-            return ResourceLocation.fromNamespaceAndPath("minecraft", "textures/models/armor/iron_layer_" + layerNum + ".png");
-        }
-
-        ResourceLocation finalTexture = bakePixels(layers, cacheKey);
-        if (finalTexture != null) {
-            BAKED_CACHE.put(cacheKey, finalTexture);
-        }
-
-        return finalTexture;
+        return null;
     }
 
     private static String generateCacheKey(ItemStack stack, EquipmentSlot slot) {
         String itemName = BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath();
+        String visualDataStr = stack.getComponents().toString();
 
-        StringBuilder visualData = new StringBuilder();
-        visualData.append(stack.getComponents().toString());
+        String safeHash = Integer.toHexString(visualDataStr.hashCode());
 
-        int visualHash = visualData.toString().hashCode();
+        String safeItemName = itemName.replaceAll("[^a-z0-9_]", "_");
+        String safeSlotName = slot.getName().replaceAll("[^a-z0-9_]", "_");
 
-        return "tic_baked_" + itemName + "_" + slot.getName() + "_" + visualHash;
+        return "tic_baked_" + safeItemName + "_" + safeSlotName + "_" + safeHash;
     }
 
     private static ResourceLocation bakePixels(List<TinkerArmorExtractor.ArmorLayerInfo> layers, String cacheKey) {
@@ -70,8 +79,10 @@ public class ArmorTextureBaker {
         record LoadedLayer(NativeImage image, int tintColor) {}
         List<LoadedLayer> loadedLayers = new ArrayList<>();
 
-        int maxWidth = 64;
-        int maxHeight = 64;
+        // 【关键修复】从 0 开始，取所有层的最大尺寸。
+        // 原版盔甲纹理是 64x32，如果强行 64x64 会导致 UV 采样错位、下半部分透明。
+        int maxWidth = 0;
+        int maxHeight = 0;
 
         for (TinkerArmorExtractor.ArmorLayerInfo layer : layers) {
             try {
@@ -80,10 +91,8 @@ public class ArmorTextureBaker {
 
                 try (InputStream inputStream = resourceOpt.get().open()) {
                     NativeImage img = NativeImage.read(inputStream);
-
                     maxWidth = Math.max(maxWidth, img.getWidth());
                     maxHeight = Math.max(maxHeight, img.getHeight());
-
                     loadedLayers.add(new LoadedLayer(img, layer.colorTint()));
                 }
             } catch (Exception e) {
@@ -91,62 +100,85 @@ public class ArmorTextureBaker {
             }
         }
 
-        if (loadedLayers.isEmpty()) {
+        if (loadedLayers.isEmpty() || maxWidth <= 0 || maxHeight <= 0) {
+            return null;
+        }
+
+        if (maxWidth > 2048 || maxHeight > 2048) {
+            TinkerAlsoSoul.LOGGER.error("[Tinker Also Soul] Texture too large ({}x{}), aborting bake.", maxWidth, maxHeight);
+            for (LoadedLayer layer : loadedLayers) {
+                layer.image().close();
+            }
             return null;
         }
 
         NativeImage canvas = new NativeImage(maxWidth, maxHeight, true);
 
-        for (LoadedLayer layer : loadedLayers) {
-            NativeImage img = layer.image();
-            int tintColor = layer.tintColor();
+        try {
+            for (LoadedLayer layer : loadedLayers) {
+                NativeImage img = layer.image();
+                int tintColor = layer.tintColor();
 
-            int scaleX = maxWidth / img.getWidth();
-            int scaleY = maxHeight / img.getHeight();
+                int scaleX = maxWidth / img.getWidth();
+                int scaleY = maxHeight / img.getHeight();
+                if (scaleX < 1) scaleX = 1;
+                if (scaleY < 1) scaleY = 1;
 
-            for (int x = 0; x < img.getWidth(); x++) {
-                for (int y = 0; y < img.getHeight(); y++) {
-                    int pixelColor = img.getPixelRGBA(x, y);
-                    int alpha = (pixelColor >> 24) & 0xFF;
+                for (int x = 0; x < img.getWidth(); x++) {
+                    for (int y = 0; y < img.getHeight(); y++) {
+                        int pixelColor = img.getPixelRGBA(x, y);
+                        int alpha = (pixelColor >> 24) & 0xFF;
 
-                    if (alpha > 0) {
-                        if (tintColor != -1) {
+                        if (alpha > 0) {
+                            // 统一乘 tint（-1 / 0xFFFFFFFF 乘上去也不会变，不用单独判断）
                             pixelColor = multiplyColor(pixelColor, tintColor);
-                        }
 
-                        for (int dx = 0; dx < scaleX; dx++) {
-                            for (int dy = 0; dy < scaleY; dy++) {
-                                canvas.blendPixel((x * scaleX) + dx, (y * scaleY) + dy, pixelColor);
+                            for (int dx = 0; dx < scaleX; dx++) {
+                                for (int dy = 0; dy < scaleY; dy++) {
+                                    canvas.blendPixel((x * scaleX) + dx, (y * scaleY) + dy, pixelColor);
+                                }
                             }
                         }
                     }
                 }
+                img.close();
             }
-            img.close();
+
+            DynamicTexture dynamicTexture = new DynamicTexture(canvas);
+            // 【修复】补全 textures/models/armor/ 前缀和 .png，与 EpicFight/原版路径约定一致
+            ResourceLocation generatedLocation = ResourceLocation.fromNamespaceAndPath(
+                    "tinker_also_soul",
+                    "textures/models/armor/" + cacheKey + ".png"
+            );
+            Minecraft.getInstance().getTextureManager().register(generatedLocation, dynamicTexture);
+
+            return generatedLocation;
+        } catch (Exception e) {
+            TinkerAlsoSoul.LOGGER.error("[Tinker Also Soul] Error while stitching pixels!", e);
+            canvas.close();
+            return null;
         }
-
-        DynamicTexture dynamicTexture = new DynamicTexture(canvas);
-        ResourceLocation generatedLocation = ResourceLocation.fromNamespaceAndPath("tinker_also_soul", cacheKey);
-        Minecraft.getInstance().getTextureManager().register(generatedLocation, dynamicTexture);
-
-        return generatedLocation;
     }
 
     private static int multiplyColor(int basePixel, int tintColor) {
+        // NativeImage 像素格式为 ABGR：0xAABBGGRR
         int a = (basePixel >> 24) & 0xFF;
         int b = (basePixel >> 16) & 0xFF;
         int g = (basePixel >> 8)  & 0xFF;
         int r = basePixel         & 0xFF;
 
+        // tintColor 为 ARGB：0xAARRGGBB
+        int tintA = (tintColor >> 24) & 0xFF;
         int tintR = (tintColor >> 16) & 0xFF;
         int tintG = (tintColor >> 8)  & 0xFF;
         int tintB = tintColor         & 0xFF;
 
+        int newA = (a * tintA) / 255;
         int newR = (r * tintR) / 255;
         int newG = (g * tintG) / 255;
         int newB = (b * tintB) / 255;
 
-        return (a << 24) | (newB << 16) | (newG << 8) | newR;
+        return (newA << 24) | (newB << 16) | (newG << 8) | newR;
     }
 
     public static void clearCache() {

@@ -25,46 +25,48 @@ public class TinkerArmorExtractor {
     public static List<ArmorLayerInfo> getLayerPaths(ItemStack stack, EquipmentSlot slot, RegistryAccess registryAccess) {
         List<ArmorLayerInfo> layerInfos = new ArrayList<>();
 
-        ResourceLocation modelId = getModelIdFromStack(stack);
+        try {
+            ResourceLocation modelId = getModelIdFromStack(stack);
 
-        if (modelId == null) {
-            TinkerAlsoSoul.LOGGER.debug("[Tinker Also Soul] Unable to get Model Id: {}", stack.getItem().getDescriptionId());
-            return layerInfos;
-        }
-
-        ArmorModelManager.ArmorModel model = ArmorModelManager.INSTANCE.getModel(modelId);
-
-        if (model == ArmorModelManager.ArmorModel.EMPTY) {
-            return layerInfos;
-        }
-
-        TextureType type = TextureType.fromSlot(slot);
-        for (ArmorTextureSupplier supplier : model.layers()) {
-            ArmorTextureSupplier.ArmorTexture tex = supplier.getArmorTexture(stack, type, registryAccess);
-
-            if (tex != ArmorTextureSupplier.ArmorTexture.EMPTY) {
-                processTextureLayer(tex, layerInfos);
+            if (modelId == null) {
+                TinkerAlsoSoul.LOGGER.debug("[Tinker Also Soul] Unable to get Model Id: {}", stack.getItem().getDescriptionId());
+                return layerInfos;
             }
+
+            ArmorModelManager.ArmorModel model = ArmorModelManager.INSTANCE.getModel(modelId);
+
+            if (model == null || model == ArmorModelManager.ArmorModel.EMPTY) {
+                return layerInfos;
+            }
+
+            TextureType type = TextureType.fromSlot(slot);
+            // 这个循环天然支持 MultilayerArmorModel，直接遍历即可，无需额外处理
+            for (ArmorTextureSupplier supplier : model.layers()) {
+                ArmorTextureSupplier.ArmorTexture tex = supplier.getArmorTexture(stack, type, registryAccess);
+
+                if (tex != null && tex != ArmorTextureSupplier.ArmorTexture.EMPTY) {
+                    processTextureLayer(tex, layerInfos);
+                }
+            }
+        } catch (Exception e) {
+            TinkerAlsoSoul.LOGGER.error("[Tinker Also Soul] Failed to extract layer paths for item: {}", stack.getItem().getDescriptionId(), e);
         }
 
         return layerInfos;
     }
 
     private static void processTextureLayer(ArmorTextureSupplier.ArmorTexture tex, List<ArmorLayerInfo> list) {
-        if (tex instanceof TintedArmorTexture tintedTex) {
-            try {
+        try {
+            if (tex instanceof TintedArmorTexture tintedTex) {
                 Field textureField = TintedArmorTexture.class.getDeclaredField("texture");
                 textureField.setAccessible(true);
                 ResourceLocation path = (ResourceLocation) textureField.get(tintedTex);
                 int color = tintedTex.color();
-                list.add(new ArmorLayerInfo(path, color));
-            } catch (Exception e) {
-                TinkerAlsoSoul.LOGGER.error("[Tinker Also Soul] Unable to retrieve texture from TintedArmorTexture!", e);
+                if (path != null) {
+                    list.add(new ArmorLayerInfo(path, color));
+                }
             }
-        }
-
-        else if (tex instanceof TrimArmorTexture trimTex) {
-            try {
+            else if (tex instanceof TrimArmorTexture trimTex) {
                 Field spriteField = TrimArmorTexture.class.getDeclaredField("trimSprite");
                 spriteField.setAccessible(true);
                 TextureAtlasSprite sprite = (TextureAtlasSprite) spriteField.get(trimTex);
@@ -77,37 +79,61 @@ public class TinkerArmorExtractor {
                             "textures/" + spriteId.getPath() + ".png"
                     );
 
-                    list.add(new ArmorLayerInfo(realTexturePath, -1));
-                }
-            } catch (Exception e) {
-                TinkerAlsoSoul.LOGGER.error("[Tinker Also Soul] Unable to retrieve texture from TrimArmorTexture!", e);
-            }
-        }
+                    // 尝试获取 trim 的颜色
+                    int trimColor = -1;
+                    try {
+                        Field colorField = TrimArmorTexture.class.getDeclaredField("color");
+                        colorField.setAccessible(true);
+                        trimColor = (int) colorField.get(trimTex);
+                    } catch (NoSuchFieldException ignored) { }
 
-        else {
-            TinkerAlsoSoul.LOGGER.warn("[Tinker Also Soul] Unknown ArmorTexture type: {}", tex.getClass().getName());
+                    list.add(new ArmorLayerInfo(realTexturePath, trimColor));
+                }
+            }
+            else {
+                TinkerAlsoSoul.LOGGER.warn("[Tinker Also Soul] Unknown ArmorTexture type: {}", tex.getClass().getName());
+            }
+        } catch (Exception e) {
+            TinkerAlsoSoul.LOGGER.error("[Tinker Also Soul] Unable to process texture layer of type: {}", tex.getClass().getName(), e);
         }
     }
 
     @Nullable
     private static ResourceLocation getModelIdFromStack(ItemStack stack) {
         try {
-            Object extension = IClientItemExtensions.of(stack);
-            if (extension instanceof ArmorModelManager.ArmorModelDispatcher dispatcher) {
-                Method getNameMethod = ArmorModelManager.ArmorModelDispatcher.class.getDeclaredMethod("getName");
-                getNameMethod.setAccessible(true);
+            IClientItemExtensions extension = IClientItemExtensions.of(stack);
+            if (!(extension instanceof ArmorModelManager.ArmorModelDispatcher dispatcher)) {
+                return null;
+            }
 
-                ResourceLocation modelId = (ResourceLocation) getNameMethod.invoke(dispatcher);
-                if (modelId != null) {
-                    return modelId;
+            Class<?> clazz = ArmorModelManager.ArmorModelDispatcher.class;
+
+            // 【关键修复】反编译确认，ArmorModelDispatcher 没有 getName()，只有私有字段 name
+            try {
+                Field nameField = clazz.getDeclaredField("name");
+                nameField.setAccessible(true);
+                Object val = nameField.get(dispatcher);
+                if (val instanceof ResourceLocation rl) {
+                    return rl;
                 }
+            } catch (NoSuchFieldException ignored) { }
+
+            // 兜底方案：万一以后改了加了方法
+            for (String methodName : new String[]{"getName", "name"}) {
+                try {
+                    Method m = clazz.getDeclaredMethod(methodName);
+                    m.setAccessible(true);
+                    Object val = m.invoke(dispatcher);
+                    if (val instanceof ResourceLocation rl) {
+                        return rl;
+                    }
+                } catch (NoSuchMethodException ignored) { }
             }
         } catch (Exception e) {
-            // 静默处理
+            TinkerAlsoSoul.LOGGER.debug("[Tinker Also Soul] Failed to resolve armor model id", e);
         }
-
         return null;
     }
 
-    public static record ArmorLayerInfo(ResourceLocation texturePath, int colorTint) {}
+    public record ArmorLayerInfo(ResourceLocation texturePath, int colorTint) {}
 }
